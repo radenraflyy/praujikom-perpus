@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model book {
+  id                Int              @id @default(autoincrement())
+  title             String
+  author            String
+  publisher         String
+  yearOfPublication String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @default(now())
+  bookreview        bookreview[]
+  borrow            borrow?
+  myfavoritebook    myfavoritebook[]
+}
+
+model bookcategory {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
+model bookreview {
+  id     Int    @id @default(autoincrement())
+  bookId Int
+  userId Int
+  review String
+  rating String
+  book   book   @relation(fields: [bookId], references: [id], map: "BookReview_bookId_fkey")
+  user   user   @relation(fields: [userId], references: [id], map: "BookReview_userId_fkey")
+
+  @@index([bookId], map: "BookReview_bookId_fkey")
+  @@index([userId], map: "BookReview_userId_fkey")
+}
+
+model borrow {
+  id         Int      @id @default(autoincrement())
+  dateBorrow DateTime
+  returnDate DateTime
+  status     String
+  userId     Int
+  bookId     Int      @unique(map: "Borrow_bookId_key")
+  book       book     @relation(fields: [bookId], references: [id], map: "Borrow_bookId_fkey")
+  user       user     @relation(fields: [userId], references: [id], map: "Borrow_userId_fkey")
+
+  @@index([userId], map: "Borrow_userId_fkey")
+}
+
+model myfavoritebook {
+  id     Int  @id @default(autoincrement())
+  bookId Int
+  userId Int
+  book   book @relation(fields: [bookId], references: [id], map: "MyFavoriteBook_bookId_fkey")
+  user   user @relation(fields: [userId], references: [id], map: "MyFavoriteBook_userId_fkey")
+
+  @@index([bookId], map: "MyFavoriteBook_bookId_fkey")
+  @@index([userId], map: "MyFavoriteBook_userId_fkey")
+}
+
+model user {
+  id             Int              @id @default(autoincrement())
+  username       String
+  password       String
+  email          String
+  fullName       String
+  address        String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now())
+  bookreview     bookreview[]
+  borrow         borrow[]
+  myfavoritebook myfavoritebook[]
+}
